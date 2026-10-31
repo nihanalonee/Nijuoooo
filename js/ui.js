@@ -56,7 +56,7 @@ function drawAll() {
     const lo = min - pad, hi = max + pad;
     const X = (i) => (i / (data.length - 1)) * (w - 2) + 1;
     const Y = (v) => hgt - 3 - ((v - lo) / (hi - lo)) * (hgt - 6);
-    const color = cv.dataset.color || '#22d3ee';
+    const color = cv.dataset.color || '#0a5da4';
     if (cv.dataset.fill) {
       const g = c.createLinearGradient(0, 0, 0, hgt);
       g.addColorStop(0, color + '55'); g.addColorStop(1, color + '00');
@@ -76,18 +76,30 @@ export function renderTop(s) {
   const day = Math.floor(s.tick / 48) + 1;
   const hour = Math.floor(((s.tick % 48) / 2) + 6) % 24;
   const nw = netWorth(s);
+  const wr = s.gov.warrants;
   el('topbar').innerHTML = `
-    <div class="logo"><span class="dot"></span>OMNILIFE</div>
-    <div class="stat"><b class="mono">${day}d ${String(hour).padStart(2, '0')}:00</b><span>Sector-7</span></div>
-    <div class="stat"><b class="mono">${fmt(nw)}</b><span>Net worth</span></div>
-    <div class="stat"><b class="mono up">${fmt(P(s).cash)}</b><span>Clean cash</span></div>
-    <div class="stat"><b class="mono down">${fmt(P(s).dirty)}</b><span>Dirty cash</span></div>
-    <div class="stat"><b class="mono">${pct(P(s).heat / 100, 0)}</b><span>Police heat</span>
-      <div class="heatbar"><i style="width:${P(s).heat}%"></i></div></div>
-    <div class="spacer"></div>
-    <div class="row" style="margin:0">
-      ${[0, 1, 2, 4].map((x) => `<button class="spd ${s.speed === x ? 'on' : ''}" data-act="speed:${x}">${x === 0 ? '❚❚' : x + '×'}</button>`).join('')}
-      <button class="spd" data-act="newgame">⟲ New</button>
+    <div class="tb-row">
+      <div class="stat"><b class="mono"><span class="dot"></span>OMNILIFE</b><span>${s.name ? esc(s.name) : 'Sector-7'}</span></div>
+      <div class="stat"><b class="mono">${day}d ${String(hour).padStart(2, '0')}:00</b><span>Sector-7</span></div>
+      <div class="stat"><b class="mono">${fmt(nw)}</b><span>Net worth</span></div>
+      <div class="stat"><b class="mono up" style="color:var(--lime)">${fmt(P(s).cash)}</b><span>Clean</span></div>
+      <div class="stat"><b class="mono down" style="color:var(--red)">${fmt(P(s).dirty)}</b><span>Dirty</span></div>
+      <div class="stat"><b class="mono">${pct(P(s).heat / 100, 0)}</b><span>Police heat</span>
+        <div class="heatbar"><i style="width:${P(s).heat}%"></i></div></div>
+      <div class="spacer"></div>
+      <div id="speedBox">
+        ${[0, 1, 2, 4].map((x) => `<button class="spd ${s.speed === x ? 'on' : ''}" data-act="speed:${x}">${x === 0 ? '❚❚' : x + '×'}</button>`).join('')}
+        <button class="spd" data-act="newgame">⟲ New</button>
+      </div>
+    </div>
+    <div class="statusline">
+      <span>GAS $${s.market.gasFee}</span>
+      <span>NET ${(s.city.congestion * 100).toFixed(0)}%</span>
+      <span>SENT-C ${(s.market.sentiment.crypto * 100).toFixed(0)}%</span>
+      <span>SENT-M ${(s.market.sentiment.media * 100).toFixed(0)}%</span>
+      ${wr ? `<span style="color:var(--red)">WARRANTS ${wr}</span>` : ''}
+      ${s.god ? '<span style="color:var(--acc)">GOD✔</span>' : ''}
+      <span style="margin-left:auto">(AUTOSAVE ACTIVE)</span>
     </div>`;
 }
 
@@ -188,7 +200,7 @@ function vTrade(s) {
       <div class="row"><div class="bigflow mono">${fmt(price(t))}</div><div>${chgFmt(d12)}</div>
       ${t.rugPulled ? '<span class="pill r blink">RUGGED 💀</span>' : ''}
       ${staked > 0 ? `<span class="pill c">staked ${cfmt(staked)}</span>` : ''}</div>
-      <canvas class="chartBig" data-hist="${t.hist.slice(-120).map((v) => +v.toPrecision(5)).join(',')}" data-color="#22d3ee" data-fill="1"></canvas>
+      <canvas class="chartBig" data-hist="${t.hist.slice(-120).map((v) => +v.toPrecision(5)).join(',')}" data-color="#0a5da4" data-fill="1"></canvas>
       ${(P(s).lp[t.sym] ? `<p class="opnote">Your LP: ${fmt(P(s).lp[t.sym])} of pool ${fmt(t.pool.cash)}</p>` : '')}
       <div class="row" style="margin-top:10px">
         <input id="amtBuy" type="number" min="0" step="any" placeholder="USD amount" style="width:130px" />
@@ -318,7 +330,7 @@ function vCity(s) {
     </div>
   </div>
   <div class="card" style="margin-top:14px"><h3>REAL ESTATE PORTFOLIO <span class="rt">${s.city.districts.reduce((a, d) => a + (p.props[d.id] || 0), 0)} units</span></h3>
-    <canvas class="chartBig" data-hist="${(s.city.districts[0]?.hist || [1]).map((v) => +v.toPrecision(5)).join(',')}" data-color="#c084fc" data-fill="1"></canvas>
+    <canvas class="chartBig" data-hist="${(s.city.districts[0]?.hist || [1]).map((v) => +v.toPrecision(5)).join(',')}" data-color="#6d28a8" data-fill="1"></canvas>
     <p class="dim" style="margin-top:6px">Financial Quarter index over time. Property is the old money's game — crime and congestion bend the curve.</p>
   </div>`;
 }

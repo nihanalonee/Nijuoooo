@@ -43,6 +43,11 @@ document.getElementById('loginForm').addEventListener('submit', (e) => {
   boot();
 });
 
+// live hint while typing the god-key email
+el('inEmail').addEventListener('input', (e) => {
+  el('godHint').classList.toggle('show', e.target.value.trim().toLowerCase() === GOD_EMAIL);
+});
+
 function seedWire() {
   mk.wire(S, '🔔 SECTOR-7 MARKETS OPEN. Backbones hot, gas at $' + S.market.gasFee + '.', 'info');
   mk.wire(S, `${S.npcs[0].emoji} ${S.npcs[0].name} is reportedly raising a war chest.`, 'info');
