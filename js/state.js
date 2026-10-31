@@ -78,6 +78,14 @@ export function defaultState({ name, email, god }) {
     { id: 'c_helio', name: 'HelioMart', sector: 'Retail', ceo: 'Brocktionel', shares: 400e6, price: 4.8, drift: 0.0008, vol: 0.02, hist: [4.8], alive: true },
   ];
 
+  // special-case the stablecoin: seed it exactly at its $1 peg
+  const wusd = tokens.find((t) => t.sym === 'WUSD');
+  if (wusd) {
+    wusd.pool.tok = wusd.pool.cash;
+    wusd.p0 = 1;
+    wusd.hist = [1];
+  }
+
   const npcs = RIVALS.map((r) => ({
     ...r, money: r.seedMoney,
     holdings: {}, // sym -> tokens
