@@ -2,13 +2,23 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#d9dcd2" />
 <title>OmniLife: The Syndicate</title>
 <meta name="description" content="Massive real-time economic & life simulation: crypto DEX, banking empires, ISP backbones, media networks, crime syndicates and autonomous AI rivals." />
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏙️</text></svg>" />
 <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
+  <!-- ============ BOOT OVERLAY ============ -->
+  <div id="boot" class="booter"><div class="bootcard win">
+    <div class="win-title"><span>BOOTING SECTOR-7…</span></div>
+    <div class="bootbody">
+      <div class="bars"><i></i><i></i><i></i></div>
+      <p class="mono">waking the world engine…</p>
+    </div>
+  </div></div>
+
   <!-- ============ LOGIN / BOOT ============ -->
   <div id="login">
     <form class="login-card win" id="loginForm" autocomplete="off">
@@ -48,7 +58,31 @@
     </div>
   </div>
 
-  <div id="toasts"></div>
+  <!-- notification centre drawer -->
+  <aside id="drawer" class="drawer" aria-label="Notifications">
+    <div class="win">
+      <div class="win-title"><span>🔔 NOTIFICATION CENTRE</span><span class="sx"><button class="spd" data-act="drawer:close" aria-label="Close">×</button></span></div>
+      <div class="drawer-body">
+        <div class="row" style="justify-content:space-between;padding:0 2px 6px">
+          <span class="dim" style="font-size:10.5px" id="notiMeta">0 unread</span>
+          <button class="chip" data-act="noti:clear">Clear all</button>
+        </div>
+        <div id="toasts" class="feed"></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- generic bottom sheet (page More-menu, wizards, confirms) -->
+  <div id="sheet" class="sheet-scrim" data-act="sheet:close">
+    <div class="sheet win" role="dialog" aria-modal="true">
+      <div class="win-title"><span id="sheetTitle">TOOL</span><span class="sx"><button class="spd" data-act="sheet:close" aria-label="Close">×</button></span></div>
+      <div id="sheetBody" class="sheet-body"></div>
+    </div>
+  </div>
+
+  <!-- single non-stacking toast -->
+  <div id="toast" class="toastbox" role="status" aria-live="polite"></div>
+
   <script type="module" src="./js/main.js"></script>
 </body>
 </html>

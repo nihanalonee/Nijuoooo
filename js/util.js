@@ -1,4 +1,5 @@
-/* OMNILIFE: THE SYNDICATE - core utilities */
+/* OMNILIFE core utilities + UI services: single-toast queue,
+ * notification-centre store, position/flow cache (UI-layer, not saved in game state). */
 
 // Deterministic-enough RNG (mulberry32) — the world engine stays seeded
 // per save so reloads don't re-roll history.
@@ -8,7 +9,6 @@ export function seedRng(n) {
   RNG_STATE = n >>> 0 || 123456789;
 }
 export function rng() {
-  // mulberry32
   RNG_STATE = (RNG_STATE + 0x6d2b79f5) | 0;
   let t = RNG_STATE;
   t = Math.imul(t ^ (t >>> 15), t | 1);
@@ -55,32 +55,95 @@ export function cfmt(n) {
 
 // ---------- DOM helpers ----------
 export const el = (id) => document.getElementById(id);
-export function h(html) {
-  const t = document.createElement('template');
-  t.innerHTML = html.trim();
-  return t.content.firstElementChild;
-}
 export const esc = (s) =>
   String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
   }[c]));
 
-// Tiny toast system
-export function toast(text, kind = 'info') {
-  const box = el('toasts');
-  if (!box) return;
-  const t = h(`<div class="toast ${kind}">${esc(text)}</div>`);
-  box.appendChild(t);
-  requestAnimationFrame(() => t.classList.add('show'));
-  setTimeout(() => {
-    t.classList.remove('show');
-    setTimeout(() => t.remove(), 300);
-  }, 4600);
+/** Diff-write innerHTML into a node; keeps focus when it lived inside. */
+export function put(node, html) {
+  if (!node) return;
+  const act = node.contains(document.activeElement) ? document.activeElement : null;
+  if (act && act.id && act.value !== undefined) {
+    // preserve typed value across rebuild
+    const id2 = act.id, v2 = act.value;
+    if (node.__v === html) return;
+    node.innerHTML = html;
+    const n2 = document.getElementById(id2);
+    if (n2) { n2.value = v2; n2.focus(); }
+  } else {
+    if (node.__v === html) return;
+    node.innerHTML = html;
+  }
+  node.__v = html;
 }
+
+/** Diff-write text into a node (per-tick hot path) */
+export function setT(node, val) {
+  if (!node) return;
+  if (node.__t === val) return;
+  node.__t = val;
+  node.textContent = val;
+}
+
+// ---------- NOTIFICATION CENTRE ----------
+const NK = 'omnilife.noti.v1';
+let NOTIS = [];
+let UNREAD = 0;
+try {
+  NOTIS = JSON.parse(localStorage.getItem(NK) || '[]');
+  if (!Array.isArray(NOTIS)) NOTIS = [];
+} catch { NOTIS = []; }
+const notiSave = () => { try { localStorage.setItem(NK, JSON.stringify(NOTIS.slice(0, 40))); } catch {} };
+
+export function pushNoti(text, kind = 'info') {
+  NOTIS.push({ t: Date.now(), text, kind });
+  UNREAD += 1;
+  notiSave();
+  window.dispatchEvent(new CustomEvent('omni-noti'));
+}
+export function getNotis() { return NOTIS; }
+export function unreadCount() { return UNREAD; }
+export function clearUnread() { UNREAD = 0; window.dispatchEvent(new CustomEvent('omni-noti')); }
+export function clearNotis() {
+  NOTIS = [];
+  UNREAD = 0;
+  notiSave();
+  window.dispatchEvent(new CustomEvent('omni-noti'));
+}
+
+// ---------- SINGLE (non-stacking) TOAST ----------
+let toastTimer = 0;
+export function toast(text, kind = 'info') {
+  const box = el('toast');
+  if (box) {
+    box.classList.remove('show', 'ok', 'bad', 'warn');
+    void box.offsetWidth; // restart transition
+    box.textContent = text;
+    if (kind === 'ok' || kind === 'bad' || kind === 'warn') box.classList.add(kind);
+    box.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => box.classList.remove('show'), 4200);
+  } else { console.log('[toast]', kind, text); }
+  pushNoti(text, kind);
+}
+
+// ---------- UI-layer caches (kept OUT of the game state) ----------
+const PK = 'omnilife.pos.v1';
+export const UC = { pos: {}, flow: { day: -1, i: 0, e: 0 } };
+try { const p = JSON.parse(localStorage.getItem(PK) || '{}'); if (p && typeof p === 'object') UC.pos = p; } catch {}
+export function savePos() { try { localStorage.setItem(PK, JSON.stringify(UC.pos)); } catch {} }
+/** Record income/expense flow for "today" (resets when the in-world day rolls) */
+export function addFlow(s, delta) {
+  const day = Math.floor(s.tick / 48);
+  if (UC.flow.day !== day) { UC.flow.day = day; UC.flow.i = 0; UC.flow.e = 0; }
+  if (delta >= 0) UC.flow.i += delta; else UC.flow.e -= delta;
+}
+export function resetFlow(s) { UC.flow = { day: Math.floor(s.tick / 48), i: 0, e: 0 }; }
+export function getFlow() { return UC.flow; }
 
 // ---------- misc ----------
 export const uid = () => Math.floor(rng() * 1e10).toString(36) + Date.now().toString(36);
-export const clampPrice = (v) => clamp(v, 1e-9, 1e15);
 export function pushCapped(arr, item, cap = 140) {
   arr.push(item);
   if (arr.length > cap) arr.splice(0, arr.length - cap);
