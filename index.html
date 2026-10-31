@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>OmniLife: The Syndicate</title>
+<meta name="description" content="Massive real-time economic & life simulation: crypto DEX, banking empires, ISP backbones, media networks, crime syndicates and autonomous AI rivals." />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏙️</text></svg>" />
+<link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <!-- ============ LOGIN / BOOT ============ -->
+  <div id="login">
+    <form class="login-card" id="loginForm" autocomplete="off">
+      <div class="logo">OMNILIFE:<br/>THE SYNDICATE
+        <small>MULTIPLAYER ECONOMY SIM — SECTOR 7</small>
+      </div>
+      <p class="tagline">
+        Every NPC is a mastermind. Rival tycoons launch IPOs and pump-and-dumps in real time,
+        senators auction the law, your bank can suffer a video-taped run, and the Wire never sleeps.
+        Found a syndicate: banks, fiber, TV — or crime.
+      </p>
+      <div class="field">
+        <label for="inName">Tycoon Name</label>
+        <input id="inName" required maxlength="24" placeholder="e.g. Nyx Vanguard" />
+      </div>
+      <div class="field">
+        <label for="inEmail">Profile Email</label>
+        <input id="inEmail" type="email" maxlength="64" placeholder="tycoon@sector7.net" />
+        <div class="godHint" id="godHint">// GOD PROTOCOL KEY ACCEPTED — SERVER ADMIN CONSOLE WILL UNLOCK</div>
+      </div>
+      <button class="big" type="submit">ENTER THE SYNDICATE</button>
+      <p class="fineprint">Progress autosaves to this browser. God Protocol <code>mirajx132@gmail.com</code> unlocks the admin terminal (per master spec §8).</p>
+    </form>
+  </div>
+
+  <!-- ============ GAME ============ -->
+  <div id="app">
+    <header id="topbar"></header>
+    <div id="shell">
+      <nav id="side"></nav>
+      <main id="main"></main>
+    </div>
+  </div>
+
+  <div id="toasts"></div>
+  <script type="module" src="./js/main.js"></script>
+</body>
+</html>
